@@ -1,5 +1,12 @@
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Icon, ListTree, Menu, PackagePlus, X } from "lucide-react";
+import {
+  Icon,
+  ListTree,
+  Menu,
+  PackagePlus,
+  ShoppingBasket,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -9,7 +16,10 @@ const Navbar = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useUser();
-  const navLinks = [{ href: "/category", label: "Categories", icon: ListTree }];
+  const navLinks = [
+    { href: "/new-product", label: "Nouveau produit", icon: ShoppingBasket },
+    { href: "/category", label: "Categories", icon: ListTree },
+  ];
   const renderLinks = (baseClass: string) => (
     <>
       {navLinks.map(({ href, label, icon: Icon }) => {
