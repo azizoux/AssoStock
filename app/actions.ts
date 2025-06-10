@@ -145,6 +145,8 @@ export async function createProduct(formData: FormDataType, email: string) {
     const safeImageUrl = imageUrl || "";
     const safeUnit = unit || "";
     const association = await getAssociation(email);
+    console.log(association);
+
     if (!association) {
       throw new Error("Association not found 404");
     }

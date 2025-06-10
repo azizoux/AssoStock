@@ -1,3 +1,4 @@
+"use client";
 import { UserButton, useUser } from "@clerk/nextjs";
 import {
   Icon,
@@ -17,7 +18,8 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user } = useUser();
   const navLinks = [
-    { href: "/new-product", label: "Nouveau produit", icon: ShoppingBasket },
+    { href: "/products", label: "Produits", icon: ShoppingBasket },
+    { href: "/new-product", label: "Nouveau produit", icon: PackagePlus },
     { href: "/category", label: "Categories", icon: ListTree },
   ];
   const renderLinks = (baseClass: string) => (
