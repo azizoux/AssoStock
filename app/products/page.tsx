@@ -31,7 +31,7 @@ const page = () => {
       fetchProducts();
     }
   }, [email]);
-  console.log(products);
+
   const handleDeleteProduct = async (product: Product) => {
     const confirmDelete = confirm("Voulez-vous vraiment supprimer ce Produit?");
     if (!confirmDelete) return;

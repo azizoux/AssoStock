@@ -273,3 +273,43 @@ export async function getProductById(
     console.error(error);
   }
 }
+
+export async function replainishStockWithTransaction(
+  productId: string,
+  quantity: number,
+  email: string
+) {
+  if (quantity <= 0) {
+    throw new Error("La quantité à ajouter doit etre superieur a zero");
+  }
+  if (!email) {
+    throw new Error("Association's email is required");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found 404");
+    }
+    await prisma.product.update({
+      where: {
+        id: productId,
+        associationId: association.id,
+      },
+      data: {
+        quantity: {
+          increment: quantity,
+        },
+      },
+    });
+    await prisma.transaction.create({
+      data: {
+        type: "IN",
+        quantity: quantity,
+        productId: productId,
+        associationId: association.id,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
