@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { FormDataType, Product } from "@/type";
+import { FormDataType, OrderItem, Product } from "@/type";
 import { Category } from "@prisma/client";
 
 export async function checkAndAddAssociation(email: string, name: string) {
@@ -311,5 +311,69 @@ export async function replainishStockWithTransaction(
     });
   } catch (error) {
     console.error(error);
+  }
+}
+
+export async function deductStockWithTransaction(
+  orderItem: OrderItem[],
+  email: string
+) {
+  try {
+    if (!email) {
+      throw new Error("l'email est requis.");
+    }
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Aucune association trouvé avec cet email.");
+    }
+    for (const item of orderItem) {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+      if (!product) {
+        throw new Error(
+          `Le produit dont l'id est ${item.productId} est introuvable`
+        );
+      }
+      if (item.quantity <= 0) {
+        throw new Error(
+          `La quantité demandée pour le produit ${product.name} doit etre superieur a zero`
+        );
+      }
+      if (product.quantity < item.quantity) {
+        throw new Error(
+          `Le rpoduit "${product.name}" n'a pas assez de stock. Demandé:${item.quantity}, Disponible:${product.quantity} / ${product.unit}`
+        );
+      }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      for (const item of orderItem) {
+        await tx.product.update({
+          where: {
+            id: item.productId,
+            associationId: association.id,
+          },
+          data: {
+            quantity: {
+              decrement: item.quantity,
+            },
+          },
+        });
+
+        await tx.transaction.create({
+          data: {
+            type: "OUT",
+            quantity: item.quantity,
+            productId: item.productId,
+            associationId: association.id,
+          },
+        });
+      }
+    });
+    return { success: true, message: "Don ajouté avec succès!" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: error };
   }
 }

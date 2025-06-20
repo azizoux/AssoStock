@@ -1,6 +1,7 @@
 "use client";
 import { UserButton, useUser } from "@clerk/nextjs";
 import {
+  HandHeart,
   Icon,
   ListTree,
   Menu,
@@ -23,6 +24,7 @@ const Navbar = () => {
     { href: "/products", label: "Produits", icon: ShoppingBasket },
     { href: "/new-product", label: "Nouveau produit", icon: PackagePlus },
     { href: "/category", label: "Categories", icon: ListTree },
+    { href: "/give", label: "Donner", icon: HandHeart },
   ];
   const renderLinks = (baseClass: string) => (
     <>
