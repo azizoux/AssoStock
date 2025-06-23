@@ -31,3 +31,22 @@ export interface Transaction extends PrismaTransaction {
   price: number;
   unit: string;
 }
+
+export interface ProductOverviewStats {
+  totalProducts: number;
+  totalCategories: number;
+  totalTransactions: number;
+  stockValue: number;
+}
+
+export interface ChartData {
+  name: string;
+  value: number;
+}
+
+export interface StockSummary {
+  inStockCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  criticalProducts: Product[];
+}

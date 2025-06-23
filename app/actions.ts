@@ -1,7 +1,13 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { FormDataType, OrderItem, Product, Transaction } from "@/type";
+import {
+  FormDataType,
+  OrderItem,
+  Product,
+  ProductOverviewStats,
+  Transaction,
+} from "@/type";
 import { Category } from "@prisma/client";
 
 export async function checkAndAddAssociation(email: string, name: string) {
@@ -394,6 +400,9 @@ export async function getTransactions(
       where: {
         associationId: association.id,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
       include: {
         product: {
           include: {
@@ -414,5 +423,100 @@ export async function getTransactions(
   } catch (error) {
     console.error(error);
     return [];
+  }
+}
+
+export async function getProductOverviewStats(
+  email: string
+): Promise<ProductOverviewStats> {
+  if (!email) {
+    throw new Error("Association's email is required");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found 404");
+    }
+    const products = await prisma.product.findMany({
+      where: {
+        associationId: association.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        category: true,
+      },
+    });
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        associationId: association.id,
+      },
+    });
+    const categorySet = new Set(
+      products.map((product) => product.category.name)
+    );
+
+    const totalProducts = products.length;
+    const totalCategories = categorySet.size;
+    const totalTransactions = transactions.length;
+    const stockValue = products.reduce((acc, product) => {
+      return acc + product.price * product.quantity;
+    }, 0);
+
+    return {
+      totalProducts,
+      totalCategories,
+      totalTransactions,
+      stockValue,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      totalProducts: 0,
+      totalCategories: 0,
+      totalTransactions: 0,
+      stockValue: 0,
+    };
+  }
+}
+
+export async function getProductCategoryDistribution(email: string) {
+  if (!email) {
+    throw new Error("Association's email is required");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found 404");
+    }
+
+    const R = 5;
+
+    const categoriesWithProductCount = await prisma.category.findMany({
+      where: {
+        associationId: association.id,
+      },
+
+      include: {
+        products: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    const data = categoriesWithProductCount
+      .map((category) => ({
+        name: category.name,
+        value: category.products.length,
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, R);
+
+    return data;
+  } catch (error) {
+    console.error(error);
   }
 }
