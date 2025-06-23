@@ -6,6 +6,7 @@ import {
   ListTree,
   Menu,
   PackagePlus,
+  Receipt,
   ShoppingBasket,
   Warehouse,
   X,
@@ -25,6 +26,7 @@ const Navbar = () => {
     { href: "/new-product", label: "Nouveau produit", icon: PackagePlus },
     { href: "/category", label: "Categories", icon: ListTree },
     { href: "/give", label: "Donner", icon: HandHeart },
+    { href: "/transactions", label: "Transactions", icon: Receipt },
   ];
   const renderLinks = (baseClass: string) => (
     <>

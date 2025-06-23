@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { FormDataType, OrderItem, Product } from "@/type";
+import { FormDataType, OrderItem, Product, Transaction } from "@/type";
 import { Category } from "@prisma/client";
 
 export async function checkAndAddAssociation(email: string, name: string) {
@@ -375,5 +375,44 @@ export async function deductStockWithTransaction(
   } catch (error) {
     console.error(error);
     return { success: false, message: error };
+  }
+}
+
+export async function getTransactions(
+  email: string,
+  limit: number
+): Promise<Transaction[]> {
+  if (!email) {
+    throw new Error("Association's email is required");
+  }
+  try {
+    const association = await getAssociation(email);
+    if (!association) {
+      throw new Error("Association not found 404");
+    }
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        associationId: association.id,
+      },
+      include: {
+        product: {
+          include: {
+            category: true,
+          },
+        },
+      },
+    });
+
+    return transactions.map((tx) => ({
+      ...tx,
+      categoryName: tx.product.category.name,
+      productName: tx.product.name,
+      imageUrl: tx.product.imageUrl,
+      price: tx.product.price,
+      unit: tx.product.unit,
+    }));
+  } catch (error) {
+    console.error(error);
+    return [];
   }
 }
