@@ -88,7 +88,9 @@ const CategoryChart = ({ email }: { email: string }) => {
   if (data.length == 0) {
     return (
       <div className="w-full border-2 border-base-200 rounded-3xl p-4 mt-4">
-        <h2 className="">5 categories avec les plus des produits</h2>
+        <h2 className="text-xl font-bold mb-4">
+          5 categories avec les plus des produits
+        </h2>
         <EmptyState
           message="Aucune category pour le moment"
           IconComponent="Group"
@@ -98,7 +100,9 @@ const CategoryChart = ({ email }: { email: string }) => {
   }
   return (
     <div className="w-full border-2 border-base-200 rounded-3xl p-4 mt-4">
-      <h2 className="">5 categories avec les plus des produits</h2>
+      <h2 className="text-xl font-bold mb-4">
+        5 categories avec les plus des produits
+      </h2>
       {renderCharts()}
     </div>
   );
